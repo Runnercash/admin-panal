@@ -1,0 +1,130 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="loader.css">
+<style>
+  #overlay, #qrModal, #loader { display: none; }
+  h2 { text-align: center; }
+  .card-container { display: flex; align-items: center; flex-direction: column; gap: 15px; }
+  .btn { margin: 10px 0; padding: 10px 20px; }
+  .card { display: flex; flex-direction: column; padding: 10px; background: #114747; border-radius: 12px; gap: 4px; font-size: 20px; align-items: baseline; }
+  .qr-model {  display: flex; gap: 10px; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 35%; width: 100%; }
+  #qrModal { box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px; padding: 20px; background: #112847; border-radius: 12px; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+  .buttons { display: flex; gap: 10px; }
+  #acceptBtn { padding: 10px 15px; background: #008000; }
+  #rejectBtn { padding: 10px 15px; background: #ff0000; }
+  #closeModal { padding: 10px 15px; background: #16c2ce; }
+  #qrCodeContainer { display: flex; align-items: center; justify-content: center; padding: 15px; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); border-radius: 15px; box-shadow: 0 0 15px #00ffffcc; animation: pulseGlow 2s infinite alternate; }
+  #qrCodeContainer img { width: 220px; height: 220px; border: 3px solid #00ffff; border-radius: 10px; transition: transform 0.3s ease-in-out; }
+  #qrCodeContainer img:hover { transform: scale(1.1); box-shadow: 0 0 20px #00ffff; }
+  @keyframes pulseGlow { 0% { box-shadow: 0 0 10px #00ffff80; } 100% { box-shadow: 0 0 25px #00ffff; } }
+</style>
+<div id="loader"><div class="loader"></div></div>
+<div class="form">
+    <h2>Withdraw Requests</h2>
+    <hr>
+    <div class="card-container" id="withdrawContainer"></div>
+</div>
+<div id="overlay"></div>
+<div class="qr-model">
+<div id="qrModal">
+  <div id="qrCodeContainer"></div>
+  <div class="buttons">
+    <button id="acceptBtn" class="btn">Accept</button>
+    <button id="rejectBtn" class="btn">Reject</button>
+    <button id="closeModal" class="btn">Close</button>
+  </div>
+</div>
+</div>
+<script>
+  const apiUrl = 'https://script.google.com/macros/s/AKfycbxFtKJtzAK2vVjIQ0DHnbzAbG6abJWbJZEN5A44ffpruPXeRTBhYhKHxrccGAULO5Df/exec';
+
+  function fetchData() {
+    document.getElementById('loader').style.display = 'flex';
+    fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'action=getData'
+    })
+    .then(response => response.json())
+    .then(data => {
+      populateCards(data);
+      document.getElementById('loader').style.display = 'none';
+    })
+    .catch(error => {
+      console.error('Error fetching data:', error);
+      document.getElementById('loader').style.display = 'none';
+    });
+  }
+
+  function populateCards(data) {
+    const container = document.getElementById('withdrawContainer');
+    container.innerHTML = '';
+    data.forEach(item => {
+      const card = document.createElement('div');
+      card.classList.add('card');
+      card.dataset.rowIndex = item.rowIndex;
+      card.innerHTML = `
+        <p><strong>Email:</strong> ${item.email}</p>
+        <p><strong>UPI ID:</strong> ${item.upi}</p>
+        <p><strong>Amount:</strong> ${item.amount}</p>
+        <p><strong>Real Amount:</strong> ${item.realAmount}</p>
+        <button class="btn">View QR Code</button>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  document.addEventListener('click', function(e) {
+    if(e.target && e.target.classList.contains('btn')) {
+      const card = e.target.closest('.card');
+      const rowIndex = card.dataset.rowIndex;
+      const upi = card.querySelector('p:nth-child(2)').innerText.split(': ')[1];
+      const realAmount = card.querySelector('p:nth-child(4)').innerText.split(': ')[1];
+      const qrData = `upi://pay?pa=${upi}&am=${realAmount}&cu=INR`;
+      document.getElementById('qrCodeContainer').innerHTML =
+        '<img src="https://api.qrserver.com/v1/create-qr-code/?data=' +
+        encodeURIComponent(qrData) +
+        '&size=220x220" alt="QR Code">';
+      document.getElementById('qrModal').dataset.rowIndex = rowIndex;
+      document.getElementById('overlay').style.display = 'flex';
+      document.getElementById('qrModal').style.display = 'flex';
+    }
+  });
+
+  function updateStatus(status) {
+    const modal = document.getElementById('qrModal');
+    const rowIndex = modal.dataset.rowIndex;
+    fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'action=updateStatus&rowIndex=' + rowIndex + '&status=' + status
+    })
+    .then(response => response.json())
+    .then(result => {
+      if(result.result === 'success') {
+        const card = document.querySelector(`.card[data-row-index="${rowIndex}"]`);
+        if(card) { card.remove(); }
+        closeModal();
+      }
+    })
+    .catch(error => console.error('Error updating status:', error));
+  }
+
+  document.getElementById('acceptBtn').addEventListener('click', function() {
+    updateStatus('Accepted');
+  });
+
+  document.getElementById('rejectBtn').addEventListener('click', function() {
+    updateStatus('Rejected');
+  });
+
+  document.getElementById('closeModal').addEventListener('click', closeModal);
+
+  function closeModal() {
+    document.getElementById('qrModal').style.display = 'none';
+    document.getElementById('overlay').style.display = 'none';
+  }
+
+  window.onload = fetchData;
+</script>

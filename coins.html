@@ -1,0 +1,54 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="loader.css">
+<style>
+</style>
+<div class="image">
+    <img src="https://i.ibb.co/spRWqGT9/add-coins.png">
+</div>
+<div class="form">
+    <h2 style="text-align: center;">Update Coins</h2>
+    <input type="email" id="userEmail" placeholder="User's Email: " class="int">
+    <input type="number" id="coinsAmount" placeholder="Coins: " class="int">
+    <button onclick="updateCoins()" class="btn">Update</button>
+</div>
+
+<div id="loader" style="display: none;"><div class="loader"></div></div>
+
+<script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbzsFWZ7ktHUBw8C0JN3Jy-8xR3AJ1ir9YGxmjmduvjwvqYYzl4qUfv1Z6Ehbi0rKbNa/exec";
+
+    async function updateCoins() {
+        const email = document.getElementById("userEmail").value;
+        const coins = document.getElementById("coinsAmount").value;
+        const loader = document.getElementById("loader");
+
+        if (!email || !coins) {
+            alert("Please enter both email and coin amount!");
+            return;
+        }
+
+        loader.style.display = "flex";
+
+        try {
+            const response = await fetch(API_URL + `?action=updateCoins&email=${encodeURIComponent(email)}&coins=${coins}`, {
+                method: "GET"
+            });
+
+            const result = await response.json();
+            if (result.status === "success") {
+                alert("Coins updated successfully!");
+                location.reload();
+            } else {
+                alert("Error: " + result.message);
+                location.reload()
+            }
+        } catch (error) {
+            console.error("Error updating coins:", error);
+            alert("Failed to update coins.");
+        } finally {
+            loader.style.display = "none";
+        }
+    }
+</script>

@@ -1,0 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Quicksand:wght@300..700&display=swap');
+* { margin: 0; padding: 0; overflow-x: hidden; }
+body { background: #02192e; color: #fff; font-family: "Quicksand", sans-serif; }
+.form { display: flex; gap: 10px; justify-content: center; flex-direction: column; padding: 20px; }
+.form-h2 { font-size: 24px; font-weight: 500; }
+.form-p { margin: 0; font-size: 18px; font-weight: 600; }
+.image { display: flex; align-items: center; justify-content: center; margin: 100px 0 0 0; }
+.link { text-align: center; }
+.btn { font-family: "Inter", sans-serif; }
+.image > img { width: 220px; }
+.int::placeholder { color: #fff; font-weight: 300; }
+.int:hover { border: 1.5px solid #32cdab; }
+.int { font-family: "Noto Sans", sans-serif; outline: none; background: #002d57; color: #fff; font-weight: 300; padding: 8px 12px; border: none; border-radius: 125px; }
+.btn { background: #6f47ff; color: #fff; overflow: hidden; display: flex; align-items: center; gap: 10px; justify-content: center; padding: 8px; border-radius: 125px; border: none; font-weight: 600; }
+i { overflow: hidden; }
+.link > a { font-weight: 600; text-decoration: none; color: #fff; }
+table{ width:100%; border-collapse:collapse; background:#1a1a1a; color:#fff; font-family:Arial,sans-serif; text-align:center}
+th,td{ padding:12px; border:1px solid #333}
+th{ background:#ff6600; font-size:16px; text-transform:uppercase}
+.table-father , #data { margin: 0px 15px; overflow: scroll; }
+.rw { padding: 4px; background: #ff0000; color: #fff; }
+input[type="file"]::file-selector-button { border: 2px solid #6c5ce7; padding: 0.2em 0.4em; border-radius: 0.2em; background-color: #a29bfe; transition: 1s; }

@@ -1,0 +1,84 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="loader.css">
+<div class="form">
+  <h2 style="text-align: center;">Users</h2>
+</div>
+<div id="loader"><div class="loader"></div></div>
+<div id="data">
+  <table>
+    <thead>
+      <tr>
+        <th>S No.</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Mobile</th>
+        <th>Password</th>
+        <th>Coins</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+<script>
+  document.getElementById("loader").style.display = "flex";
+
+  fetch("https://script.google.com/macros/s/AKfycbwHGbOfb64MkYShh-_rZsW4gxWS20syj3iySiGMyTPkZI9vCrG-ZAyW5UPxMr13fUX7/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: "action=getData"
+  })
+  .then(r => r.json())
+  .then(data => {
+    var tableBody = document.getElementById("tableBody");
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      var tr = document.createElement("tr");
+
+      var tdSerial = document.createElement("td");
+      tdSerial.textContent = i;
+      tr.appendChild(tdSerial);
+
+      for (var j = 0; j < 5; j++) {
+        var td = document.createElement("td");
+        td.textContent = row[j];
+        tr.appendChild(td);
+      }
+
+      var td = document.createElement("td");
+      var select = document.createElement("select");
+      var opt1 = document.createElement("option");
+      opt1.value = "Active";
+      opt1.text = "Active";
+      select.appendChild(opt1);
+      var opt2 = document.createElement("option");
+      opt2.value = "Banned";
+      opt2.text = "Banned";
+      select.appendChild(opt2);
+      select.value = row[5];
+      select.setAttribute("data-row", i + 1);
+      select.addEventListener("change", function() {
+        var rowNum = this.getAttribute("data-row");
+        var newStatus = this.value;
+        document.getElementById("loader").style.display = "flex";
+        fetch("https://script.google.com/macros/s/AKfycbwHGbOfb64MkYShh-_rZsW4gxWS20syj3iySiGMyTPkZI9vCrG-ZAyW5UPxMr13fUX7/exec", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: "action=updateStatus&row=" + rowNum + "&status=" + newStatus
+        })
+        .then(() => {
+          document.getElementById("loader").style.display = "none";
+          alert("Status updated to " + newStatus);
+        });
+      });
+      td.appendChild(select);
+      tr.appendChild(td);
+
+      tableBody.appendChild(tr);
+    }
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("data").style.display = "block";
+  });
+</script>

@@ -1,0 +1,40 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="loader.css">
+<div class="image">
+    <img src="https://i.ibb.co/spRWqGT9/add-coins.png">
+</div>
+<form id="merchantForm" onsubmit="submitForm(event)" class="form">
+    <h2 style="text-align: center;">Upi Settings</h2>
+    <input type="text" id="merchantName" placeholder="Merchant Name:" name="merchantName" class="int" required>
+    <input type="text" id="upiId" name="upiId" placeholder="UPI ID:" class="int" required>
+    <button type="submit" class="btn">Submit</button>
+</form>
+<div id="loader" style="display:none;">
+    <div class="loader"></div>
+</div>
+<script>
+    function submitForm(event) {
+        event.preventDefault();
+        document.getElementById("loader").style.display = "flex";
+
+        var form = document.getElementById("merchantForm");
+        var formData = new FormData(form);
+
+        fetch("https://script.google.com/macros/s/AKfycbyFsySVpVGQKdr5tik2wEg0I7uzsypYQsJGo5sHG8BoyX8wgeKy5mPcvNK3EJSeJQL1/exec", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById("loader").style.display = "none";
+            alert("Data submitted successfully!");
+            window.location.reload();
+        })
+        .catch(error => {
+            document.getElementById("loader").style.display = "none";
+            alert("Error submitting data!");
+        });
+    }
+</script>

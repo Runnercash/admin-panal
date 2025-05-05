@@ -1,0 +1,72 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="loader.css">
+<style>
+    .form { padding: 0; }
+    .form > h2 { border-bottom: 1px solid; padding: 10px; }
+    .buttons { display: flex; gap: 10px; }
+    .card > img { width: 120px; }
+    .card { padding: 10px 20px; display: flex; flex-direction: column; gap: 10px; font-size: 18px; margin: 20px 10px; border-radius: 12px; background: #062a4d; }
+    .btn { width: 45%; }
+    .accept { background: #008000; }
+    .reject { background: #ff0000; }
+    .image { margin: 0px; }
+</style>
+<div class="form">
+    <h2 style="text-align:center;">Pending Coin Transactions</h2>
+    <div class="container" id="dataContainer"></div>
+</div>
+<div id="loader"><div class="loader"></div></div>
+<script>
+    async function fetchData() {
+        try {
+            document.getElementById('loader').style.display = 'flex';
+            const response = await fetch('https://script.google.com/macros/s/AKfycbwYVvlE2J1_sBAtNFgfTeyVAoeBcNcyWKXSXPUolpU7XLlkyLcasFP3LOV2hosOKrHy/exec');
+            const data = await response.json();
+            document.getElementById('loader').style.display = 'none';
+
+            const container = document.getElementById('dataContainer');
+            container.innerHTML = '';
+            
+            data.forEach((row) => {
+                if (row[5] === "") {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <p><strong>Email:</strong> ${row[0]}</p>
+                        <p><strong>Payment Method:</strong> ${row[1]}</p>
+                        <p><strong>Transaction ID:</strong> ${row[2]}</p>
+                        <p><strong>Amount:</strong> ₹${row[3]}</p>
+                        <div class="image">
+                        <img src="${row[4]}" alt="Payment Proof">
+                        </div>
+                        <p style="color: red;"><strong>Status: Pending</strong></p>
+                        <div class="buttons">
+                        <button class="btn accept" onclick="updateStatus('${row[0]}', '${row[1]}', ${row[3]}, 'Accepted')">Accept</button>
+                        <button class="btn reject" onclick="updateStatus('${row[0]}', '${row[1]}', 0, 'Rejected')">Reject</button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                }
+            });
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    }
+
+    async function updateStatus(email, title, amount, status) {
+        try {
+            document.getElementById('loader').style.display = 'flex';
+            await fetch(`https://script.google.com/macros/s/AKfycbwYVvlE2J1_sBAtNFgfTeyVAoeBcNcyWKXSXPUolpU7XLlkyLcasFP3LOV2hosOKrHy/exec?email=${email}&title=${title}&amount=${amount}&status=${status}&sendEmail=true`, {
+                method: 'GET',
+            });
+            document.getElementById('loader').style.display = 'none';
+            fetchData();
+        } catch (error) {
+            console.error('Error updating status:', error);
+        }
+    }
+
+    fetchData();
+</script>
